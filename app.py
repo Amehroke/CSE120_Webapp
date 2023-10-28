@@ -17,24 +17,10 @@ spot_defect_name =  'spot'
 cloudy_defect_name = 'cloudy'
 line_defect_name = 'scratch'
 
-set_number_defects = None ##if you want to set how many defects per image
-set_cloudy_radius_x = None ##if you want to set the radius of the cloudy circle/oval
-set_cloudy_radius_y = None ##if you want to set the radius of the cloudy circle/oval
-set_scratch_length = None
-set_scratch_thickness = None
-set_scratch_variance = None
-set_scratch_variance_add = None ##set to 1 to make scratchs darker than base, 2 to make scratchs lighter than base
-set_spot_variance = None
-set_spot_radius = None
-set_spot_variance_add = None ##set to 1 to make spot darker than base, 2 to make scratchs lighter than base
-set_radial_radius = None
-set_radial_variance = None
-set_radial_angle = None
-set_radial_variance_add = None ##set to 1 to make radial darker than base, 2 to make scratchs lighter than base
-
 defect_min = 1
 defect_max = 5
 
+#parameters to generate base image
 chip_low = 70
 chip_high = 200
 stage_low = 20
@@ -51,6 +37,7 @@ wafer_variation_high = 10
 grid_variation_low = 2
 grid_variation_high = 5
 
+#parameters to generate defects
 scratch_length_min = 10
 scratch_length_max = 20
 scratch_thickness_min = 1
@@ -76,6 +63,20 @@ radial_radius_max = 40
 stage_mid_color = random.randint(stage_low, stage_high)
 wafer_mid_color = random.randint(chip_low, chip_high)
 grid_mid_color = (wafer_mid_color - grid_darkness)
+
+scratch_varince_add = random.randint(1, 2)
+scratch_variance = random.randint(scratch_variance_min, scratch_variance_max)
+scratch_length = random.randint(scratch_length_min, scratch_length_max)
+scratch_thickness = random.randint(scratch_thickness_min,scratch_thickness_max)
+
+spot_variance = random.randint(spot_variance_min, spot_variance_max)
+spot_radius = random.randint(spot_radius_min, spot_radius_max)
+spot_variance_add = random.randint(1,2)
+
+radial_radius = random.randint(radial_radius_min, radial_radius_max)
+radial_angle = random.randint(radial_angle_min, radial_angle_max)
+radial_variance = random.randint(radial_variance_min, radial_variance_max,)
+radial_variance_add = random.randint(1,2)
 
 
 # Insert containers separated into tabs:
@@ -111,8 +112,6 @@ with tab1:
     
     st.header("Proceed to next tab to enter defects")
 
-if st.button('Next'):    
-    tab2
     
 with tab2:
     st.write("Please Enter Defects")
@@ -152,7 +151,33 @@ if submit_button1:
         scribe_y = set_scribe_y,
     )
     
-    save_base(gr , "base_img/baseimg.jpg")
+    gr.create_img()
+    
+    if rndSp:
+        spot = random.randint(defect_min, defect_max)
+
+    for i in range(spot): 
+        gr.GenerateSpotDefects(spot_defect_name, min_box_size, spot_variance, spot_radius, spot_variance_add)
+    
+    if rndSc:
+        scratch = random.randint(defect_min, defect_max)
+    
+    for i in range(scratch):
+        gr.GenerateScratch(line_defect_name, min_box_size, scratch_varince_add, scratch_variance, scratch_length, scratch_thickness)
+    
+    if rndCl:
+        cloudy = random.randint(defect_min, defect_max)
+    
+    for i in range (cloudy):
+        gr.Cloudy_defect(cloudy_radius_min , cloudy_radius_max, set_pitch_x, set_pitch_y, min_box_size, cloudy_defect_name, cloudy_blurriness)
+    
+    if rndRd:
+        radial = random.randint(defect_min, defect_max)
+    
+    for i in range(radial):
+        gr.GenerateRadial(radial_defect_name, min_box_size, radial_radius, radial_angle, radial_variance, radial_variance_add)
+    
+    gr.save_img(filename="base_img/baseimg.jpg")
     
 
 
@@ -164,7 +189,7 @@ with col1:
     
     if submit_button1: 
         with st.spinner(text='In progress'):
-            time.sleep(3)
+            time.sleep(5)
             
     if os.path.exists(base_image):
         st.image(base_image)
